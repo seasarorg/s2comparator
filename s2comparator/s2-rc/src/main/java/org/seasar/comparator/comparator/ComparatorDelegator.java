@@ -1,4 +1,4 @@
-package org.seasar.s2comparator.comparator;
+package org.seasar.comparator.comparator;
 
 import java.util.Comparator;
 

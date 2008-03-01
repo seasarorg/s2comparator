@@ -1,6 +1,6 @@
-package org.seasar.s2comparator.comparator.impl;
+package org.seasar.comparator.comparator.impl;
 
-import org.seasar.s2comparator.comparator.ComparatorDelegator;
+import org.seasar.comparator.comparator.ComparatorDelegator;
 
 public class ComparatorDelegatorImpl implements ComparatorDelegator {
 

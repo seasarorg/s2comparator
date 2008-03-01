@@ -1,4 +1,4 @@
-package org.seasar.s2comparator.annotation;
+package org.seasar.comparator.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
