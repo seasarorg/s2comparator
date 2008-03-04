@@ -3,5 +3,16 @@
     "http://www.seasar.org/dtd/components24.dtd">
 <components namespace="comparator">
     <component name="intertype" class="org.seasar.comparator.aop.intertype.ComparatorInterType"/>    
-    <component class="org.seasar.comparator.comparator.impl.ComparatorDelegatorImpl"/>
+    <component instance="prototype" class="org.seasar.comparator.comparator.impl.ComparatorDelegatorImpl">
+        <initMethod name="foo">
+        <arg>"aa"</arg>
+        </initMethod>
+    
+    </component>
+    <component class="org.seasar.comparator.meta.impl.ComparatorMetadataImpl"></component>
+    <component name="interceptor" class="org.seasar.comparator.aop.interceptor.ComparatorInterceptor">
+    </component>
+    
+    <!-- component class="org.seasar.comparator.comparator.impl.ComparatorDelegatorFactoryImpl"/>
+ -->
 </components>
