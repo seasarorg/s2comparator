@@ -1,6 +1,8 @@
 package org.seasar.comparator.meta.impl;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,27 +35,30 @@ public class ComparatorMetadataImpl implements ComparatorMetadata {
 	}
 
 	Comparator createComparator(Method method) {
-		String orderByClause = method.getAnnotation(OrderBy.class).value();
-		Class recordClass = method.getAnnotation(RecordType.class).value();
+		Class rtnClass = method.getReturnType();
+		String orderByClause = extactOrderByCaluse(method);
+		Class recordClass = extactRecordType(method);
 		BeanDesc beanDesc = BeanDescFactory.getBeanDesc(recordClass);
 		ComparisonRule[] rules = parseClause(orderByClause, beanDesc);
-		
+
 		return new ComparisonDelegator(rules, beanDesc);
-	}
+	}
+
 	ComparisonRule[] parseClause(String orderByClause, BeanDesc beanDesc) {
-		
+
 		String[] sortOrders = orderByClause.split("\\s*,\\s*");
 		ComparisonRule[] rules = new ComparisonRule[sortOrders.length];
-		for (int i=0; i< sortOrders.length; i++) {
+		for (int i = 0; i < sortOrders.length; i++) {
 			String[] s = sortOrders[i].split("\\s+");
 			String propertyName = s[0];
 			PropertyDesc pDesc = beanDesc.getPropertyDesc(propertyName);
-			
+
 			if (!pDesc.isReadable()) {
-				throw new SRuntimeException("unreadable property:" + propertyName);
+				throw new SRuntimeException("unreadable property:"
+						+ propertyName);
 			}
 			boolean ascending = true;
-			if (s.length>1) {
+			if (s.length > 1) {
 				String a = s[1].toLowerCase();
 				if ("asc".equals(a)) {
 					ascending = true;
@@ -62,40 +67,66 @@ public class ComparatorMetadataImpl implements ComparatorMetadata {
 				}
 			}
 			boolean nullsAreHigh = true;
-			
-			if (s.length>=3 && "nulls".equalsIgnoreCase(s[s.length-2])) {
-				if ("first".equalsIgnoreCase(s[s.length-1])) {
-					nullsAreHigh = !ascending; 
-				} else if ("last".equalsIgnoreCase(s[s.length-1])) {
+
+			if (s.length >= 3 && "nulls".equalsIgnoreCase(s[s.length - 2])) {
+				if ("first".equalsIgnoreCase(s[s.length - 1])) {
+					nullsAreHigh = !ascending;
+				} else if ("last".equalsIgnoreCase(s[s.length - 1])) {
 					nullsAreHigh = ascending;
 				}
 			}
-			
-			
+
 			ComparisonRule rule = new ComparisonRule();
 			rule.setAscending(ascending);
 			rule.setPropertyName(propertyName);
 			rule.setNullsAreHigh(nullsAreHigh);
-			//TODO
+			// TODO
 			rule.setComparator(null);
 			rules[i] = rule;
 		}
-		
+
 		// TODO Auto-generated method stub
 		return rules;
 	}
 
 	boolean checkMethodAnnotation(Method method) {
-		if (Comparator.class != method.getReturnType()) {
+		if (!Comparator.class.equals(method.getReturnType())) {
 			return false;
 		}
-		if (method.getAnnotation(OrderBy.class) == null) {
+		if (extactOrderByCaluse(method) == null) {
 			return false;
 		}
-		if (method.getAnnotation(RecordType.class) == null) {
+		if (extactRecordType(method) == null) {
 			return false;
 		}
 		return true;
+	}
+	
+	String extactOrderByCaluse(Method method) {
+		OrderBy antn = method.getAnnotation(OrderBy.class);
+		if (antn !=null) {
+			return antn.value();
+		}
+		return null;
+	}
+
+	Class extactRecordType(Method method) {
+		Class recordType = null;
+		RecordType rt = method.getAnnotation(RecordType.class);
+		if (rt != null) {
+			recordType = rt.value();
+		}
+		if (recordType != null) {
+			return recordType;
+		}
+
+		try {
+			Type t = ((ParameterizedType) method.getGenericReturnType())
+					.getActualTypeArguments()[0];
+			return (Class) t;
+		} catch (Exception e) {
+		}
+		return recordType;
 	}
 
 }
