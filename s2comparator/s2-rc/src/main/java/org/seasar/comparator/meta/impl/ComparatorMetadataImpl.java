@@ -85,7 +85,6 @@ public class ComparatorMetadataImpl implements ComparatorMetadata {
 			rules[i] = rule;
 		}
 
-		// TODO Auto-generated method stub
 		return rules;
 	}
 
